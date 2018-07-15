@@ -1,3 +1,5 @@
+pyquery
+aiohttp
 requests
 wordcloud
 jieba
