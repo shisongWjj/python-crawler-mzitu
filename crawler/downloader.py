@@ -14,12 +14,15 @@ async def download_page(session, url):
     """
     # https://docs.aiohttp.org/en/stable/client_reference.html#basic-api
     # https://docs.aiohttp.org/en/stable/client_reference.html#response-object
-    async with session.get(url) as resp:
-        if resp.status == 200:
-            return await resp.text(encoding='utf-8')
-        else:
-            print('status = {}, reason = {}'.format(resp.status, resp.reason))
-            resp.raise_for_status()
+    try:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                return await resp.text(encoding='utf-8')
+            else:
+                print('status = {}, reason = {}'.format(resp.status, resp.reason))
+                # resp.raise_for_status()
+    except Exception as e:
+        print(e)
 
 
 async def download_image(session, url):
@@ -30,12 +33,15 @@ async def download_image(session, url):
     :return:
     """
     # https://docs.aiohttp.org/en/stable/client_reference.html#response-object
-    async with session.get(url) as resp:
-        if resp.status == 200:
-            return await resp.read()
-        else:
-            print('status = {}, reason = {}'.format(resp.status, resp.reason))
-            resp.raise_for_status()
+    try:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                return await resp.read()
+            else:
+                print('status = {}, reason = {}'.format(resp.status, resp.reason))
+                # resp.raise_for_status()
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':

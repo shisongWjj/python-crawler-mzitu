@@ -37,7 +37,7 @@ class MyFileUtils:
     def save_photo(self, _dir, photo, data):
         """
         保存图片文件
-        :param _dir: 目录
+        :param _dir: 目录，目录名使用专辑名不是一个好的选择~，出现?这样的创建目录会抛异常，改为使用专辑ID
         :param photo: 图片名称
         :param data:  图片字节数据
         :return:

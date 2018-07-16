@@ -32,18 +32,18 @@ async def parse_html(url, html):
     # 不同类型页面返回的数据可能不一致，所以这里用字典封装
     url_prefix = 'http://www.mzitu.com'
     if url == '{}/'.format(url_prefix) or \
-            re.match(r'^{}/page/(\d+)/$'.format(url_prefix), url, re.I):
+            re.match(r'^{}/page/\d+/$'.format(url_prefix), url, re.I):
         # 解析列表页
         photo_page_urls, list_page_urls = await _parse_list_page(pq)
         return {'photo_page_urls': photo_page_urls, 'list_page_urls': list_page_urls}
-    elif re.match(r'^{}/(\d+)$'.format(url_prefix), url, re.I):
+    elif re.match(r'^{}/\d+$'.format(url_prefix), url, re.I):
         # 解析专辑页(图片页首页)
-        album_info, photo_page_urls, image = await _parse_album_page(pq)
+        album_info, photo_page_urls, image = await _parse_album_page(pq, url)
         return {'photo_page_urls': photo_page_urls, 'album_info': album_info, 'image': image}
-    elif re.match(r'^{}/(\d+)/\d+$'.format(url_prefix), url, re.I):
+    elif re.match(r'^{}/\d+/\d+$'.format(url_prefix), url, re.I):
         # 解析图片页
-        _, photo_page_urls, image = await _parse_photo_page(pq)
-        return {'photo_page_urls': photo_page_urls, 'image': image}
+        album_info, photo_page_urls, image = await _parse_photo_page(pq, url)
+        return {'photo_page_urls': photo_page_urls, 'album_info': album_info, 'image': image}
     else:
         return {}
 
@@ -64,10 +64,11 @@ async def _parse_list_page(pq):
     return photo_page_urls, list_page_urls
 
 
-async def _parse_album_page(pq):
+async def _parse_album_page(pq, url):
     """
     专辑页信息提取，返回专辑信息、照片页链接列表、专辑封面图片地址
     :param pq:
+    :param url: url参数用于提取专辑编号信息(专辑编号指的是原网站的专辑ID)
     :return:
     """
 
@@ -80,16 +81,22 @@ async def _parse_album_page(pq):
     category = pq('div.main-meta a[rel="category tag"]').text().strip()
     p_time = ' '.join(pq('div.main-meta span:eq(1)').text().strip().split(' ')[1:])
     views = int(pq('div.main-meta span:eq(2)').text().strip().replace('次浏览', '').replace(',', ''))
+    tags = [a.text.strip() for a in pq('div.main-tags > a[href]')]
     image = pq('div.main-image img[src]').attr('src').strip()
-    # print(name, category, p_time, views, image)
+    # print(name, category, p_time, views, tags, image)
+
+    # 从URL中提取专辑ID
+    number = int(url.split('/')[-1])
 
     return {'name': name,
+            'number': number,
             'category': category,
+            'tags': ','.join(tags),
             'publish_time': p_time,
             'views': views}, photo_page_urls, image
 
 
-async def _parse_photo_page(pq):
+async def _parse_photo_page(pq, url):
     # 照片页链接列表
     photo_page_urls = {a.get('href').strip() for a in pq('div.pagenavi > a[href]')}
     # print(photo_page_urls)
@@ -98,7 +105,10 @@ async def _parse_photo_page(pq):
     image = pq('div.main-image img[src]').attr('src').strip()
     # print(image)
 
-    return None, photo_page_urls, image
+    # 从URL中提取专辑ID，使用ID作为图片存放目录之用
+    number = int(url.split('/')[-2])
+
+    return {'number': number}, photo_page_urls, image
 
 
 if __name__ == '__main__':
