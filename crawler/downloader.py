@@ -1,7 +1,8 @@
 import asyncio
-import os
 
 import aiohttp
+
+from crawler.file_utils import MyFileUtils
 
 
 async def download_page(session, url):
@@ -63,12 +64,9 @@ if __name__ == '__main__':
 
             # 下载图片，将图片写入磁盘
             image = await download_image(session, r'http://i.meizitu.net/2018/07/08c01.jpg')
-            # 目录可能不存在，先创建目录
-            if not os.path.exists('.data'):
-                os.mkdir('.data')
-            # 注意要以二进制文件形式打开
-            with open('.data/08c01.jpg', 'bw+') as f:
-                f.write(image)
+            # 保存图片
+            utils = MyFileUtils()
+            utils.save_photo('.data', '08c01.jpg', image)
 
 
     loop = asyncio.get_event_loop()
