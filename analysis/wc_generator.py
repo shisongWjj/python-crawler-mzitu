@@ -16,8 +16,13 @@ def generate(text):
     # 删除不必要分词
     [jieba.del_word(k) for k in ['十足', '令人', '尽显', '演绎']]
 
-    # 取Top100的词生成词云
     # https://github.com/fxsjy/jieba#基于-tf-idf-算法的关键词抽取
+    # 取Top30，生成直方图，返回是一个Tuple列表，其中权重以小数表示
+    tags = analyse.extract_tags(text, topK=30, withWeight=True, )
+    # 为了便于计算，将权重乘以100转换为百分数，方便使用Excel生成图表
+    [print(item[0], '\t', int(item[1] * 100)) for item in tags]
+
+    # 取Top100的词生成词云
     tags = analyse.extract_tags(text, topK=100, withWeight=False)
     new_text = ' '.join(tags)
     print(new_text)
