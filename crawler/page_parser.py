@@ -8,12 +8,24 @@ from crawler.downloader import download_page
 
 
 async def parse_html(url, html):
+    """
     # http://pyquery.readthedocs.io/en/latest/
     # 根据url判断列表页还是专辑页，除这两类URL外忽略之
     # 列表页 -> http://www.mzitu.com/page/4/
     #        -> http://www.mzitu.com/
     # 专辑页 -> http://www.mzitu.com/142026
     #        -> http://www.mzitu.com/142026/2
+
+    :param url:
+    :param html:
+    :return: 返回一个字典对象，包含如下字段，其中任意字段都可能空，处理里需要判断
+    {
+    'photo_page_urls': [],
+    'list_page_urls': [],
+    'album_info': {},
+    'image': ''
+    }
+    """
 
     pq = PyQuery(html)
 
@@ -67,7 +79,7 @@ async def _parse_album_page(pq):
     name = pq('h2.main-title').text().strip()
     category = pq('div.main-meta a[rel="category tag"]').text().strip()
     p_time = ' '.join(pq('div.main-meta span:eq(1)').text().strip().split(' ')[1:])
-    views = ''.join(pq('div.main-meta span:eq(2)').text().strip().replace('次浏览', '').split(','))
+    views = int(pq('div.main-meta span:eq(2)').text().strip().replace('次浏览', '').replace(',', ''))
     image = pq('div.main-image img[src]').attr('src').strip()
     # print(name, category, p_time, views, image)
 
